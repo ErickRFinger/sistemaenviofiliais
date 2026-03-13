@@ -19,10 +19,6 @@ export default function GerenciarProdutos() {
     const [adding, setAdding] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
-
     const fetchProducts = async () => {
         setLoading(true);
         // Supabase fetch
@@ -54,6 +50,10 @@ export default function GerenciarProdutos() {
         }
         setLoading(false);
     };
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
 
     const handleAddOrEdit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -151,7 +151,7 @@ export default function GerenciarProdutos() {
     }, [searchTerm, products]);
 
     return (
-        <div className="animate-fade-in grid-responsive" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '2rem', height: '100%', alignItems: 'start' }}>
+        <div className="animate-fade-in grid-responsive mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '2rem', height: '100%', alignItems: 'start' }}>
             {/* Left: Product List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
                 <header>

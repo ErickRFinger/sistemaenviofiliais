@@ -27,10 +27,6 @@ export default function Historico() {
     const [activeTab, setActiveTab] = useState<'pendente' | 'recebido'>('pendente');
     const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchShipments();
-    }, []);
-
     async function fetchShipments() {
         setLoading(true);
         const { data, error } = await supabase
@@ -45,6 +41,10 @@ export default function Historico() {
         }
         setLoading(false);
     }
+
+    useEffect(() => {
+        fetchShipments();
+    }, []);
 
     async function handleConfirmReceive(id: string) {
         if (!window.confirm('Confirmar o recebimento deste lote na filial?')) return;
@@ -187,11 +187,12 @@ export default function Historico() {
                                     </div>
 
                                     {/* Actions Area */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', flexWrap: 'wrap' }}>
+                                    <div className="mobile-stack" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', flexWrap: 'wrap' }}>
                                         {shipment.status === 'pendente' && (
                                             <>
                                                 <button
                                                     onClick={() => navigate(`/editar/${shipment.id}`)}
+                                                    className="mobile-w-full"
                                                     style={{
                                                         background: 'rgba(255,255,255,0.05)',
                                                         color: 'white',
@@ -204,7 +205,8 @@ export default function Historico() {
                                                         gap: '0.5rem',
                                                         fontSize: '0.85rem',
                                                         fontWeight: '600',
-                                                        transition: 'all 0.2s'
+                                                        transition: 'all 0.2s',
+                                                        justifyContent: 'center'
                                                     }}
                                                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                                                     onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
@@ -214,6 +216,7 @@ export default function Historico() {
                                                 </button>
                                                 <button
                                                     onClick={() => handleConfirmReceive(shipment.id)}
+                                                    className="mobile-w-full"
                                                     style={{
                                                         background: 'var(--success)',
                                                         color: '#fff',
@@ -227,7 +230,8 @@ export default function Historico() {
                                                         fontSize: '0.85rem',
                                                         fontWeight: '600',
                                                         transition: 'all 0.2s',
-                                                        boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)'
+                                                        boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)',
+                                                        justifyContent: 'center'
                                                     }}
                                                     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
                                                     onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}

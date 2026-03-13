@@ -197,7 +197,7 @@ export default function EditarEnvio() {
     }
 
     return (
-        <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 400px', gap: '2rem', height: '100%', alignItems: 'start' }}>
+        <div className="animate-fade-in grid-responsive mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 400px', gap: '2rem', height: '100%', alignItems: 'start' }}>
 
             {/* Left Column: Product Selection */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
