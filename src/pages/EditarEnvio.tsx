@@ -254,35 +254,35 @@ export default function EditarEnvio() {
     );
 
     return (
-        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
+        <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
             
-            {/* HEADER FIXO NO TOPO */}
-            <div className="glass-panel" style={{ padding: '1.5rem', position: 'sticky', top: 0, zIndex: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <button
-                            onClick={() => navigate('/')}
-                            style={{
-                                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)',
-                                color: 'white', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}
-                        >
-                            <ArrowLeft size={20} />
-                        </button>
-                        <div>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Editar Envio</h2>
-                        </div>
-                    </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                <button
+                    onClick={() => navigate('/')}
+                    style={{
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)',
+                        color: 'white', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}
+                >
+                    <ArrowLeft size={20} />
+                </button>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>Editar Envio</h2>
+            </div>
+
+            {/* HEADER DE DADOS DO ENVIO (Rola junto com a página) */}
+            <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+                <div style={{ marginBottom: '1.25rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--accent)' }}>1. Dados do Lote</h3>
                 </div>
                 {checkoutForm}
             </div>
 
-            <div className="grid-responsive mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '2rem', flex: 1, alignItems: 'start' }}>
+            <div className="grid-responsive mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '2rem', alignItems: 'start' }}>
 
             {/* Left Column: Product Selection */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Modificar Produtos</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>2. Modificar Produtos</h3>
 
                 <div className="glass-panel" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
@@ -298,7 +298,7 @@ export default function EditarEnvio() {
                     </div>
                 </div>
 
-                <div style={{ overflowY: 'auto', paddingRight: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '2rem' }}>
+                <div style={{ paddingRight: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {loadingCatalog ? (
                         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Carregando catálogo de equipamentos...</div>
                     ) : categories.map(category => {
@@ -401,10 +401,10 @@ export default function EditarEnvio() {
             </div>
 
             {/* Right Column: Checkout/Summary (Desktop) */}
-            <div className="glass-panel desktop-only-checkout" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: 'calc(100vh - 14rem)', position: 'sticky', top: '12rem', overflowY: 'auto' }}>
+            <div className="glass-panel desktop-only-checkout" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'sticky', top: '2rem' }}>
                 <h4 style={{ fontSize: '1.25rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>Carrinho do Lote</h4>
 
-                <div style={{ flex: 1, minHeight: '150px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {cartArray.length === 0 ? (
                         <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem 1rem', fontSize: '0.9rem' }}>
                             Nenhum produto selecionado.
