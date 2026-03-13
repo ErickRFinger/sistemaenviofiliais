@@ -1,5 +1,6 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PackagePlus, Tag } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, Tag, ShoppingBag, Send } from 'lucide-react';
 import './index.css';
 
 // Lazy loading could be used here, but for simplicity we import directly for now
@@ -7,6 +8,8 @@ import Historico from './pages/Historico';
 import NovoEnvio from './pages/NovoEnvio';
 import EditarEnvio from './pages/EditarEnvio';
 import GerenciarProdutos from './pages/GerenciarProdutos';
+import Compras from './pages/Compras';
+import EnvioClientes from './pages/EnvioClientes';
 
 function Sidebar() {
   const location = useLocation();
@@ -61,6 +64,25 @@ function Sidebar() {
           <Tag size={20} />
           Catálogo
         </Link>
+        
+        <div style={{ margin: '0.5rem 0', borderTop: '1px solid var(--border)', opacity: 0.5 }}></div>
+
+        <Link
+          to="/compras"
+          className={`nav-link ${location.pathname === '/compras' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/compras')}
+        >
+          <ShoppingBag size={20} />
+          Compras
+        </Link>
+        <Link
+          to="/envio-clientes"
+          className={`nav-link ${location.pathname === '/envio-clientes' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/envio-clientes')}
+        >
+          <Send size={20} />
+          Envio Clientes
+        </Link>
       </nav>
 
       <div style={{ marginTop: 'auto', padding: '1rem', textAlign: 'center' }}>
@@ -111,6 +133,8 @@ function InnerApp() {
           <Route path="/novo-envio" element={<NovoEnvio />} />
           <Route path="/editar/:id" element={<EditarEnvio />} />
           <Route path="/produtos" element={<GerenciarProdutos />} />
+          <Route path="/compras" element={<Compras />} />
+          <Route path="/envio-clientes" element={<EnvioClientes />} />
         </Routes>
       </main>
 
@@ -118,15 +142,23 @@ function InnerApp() {
       <nav className="mobile-nav-bar">
         <Link to="/" style={mobileNavStyle(isActive('/'))}>
           <LayoutDashboard size={24} />
-          <span style={{ fontSize: '0.7rem', fontWeight: '500' }}>Início</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Início</span>
         </Link>
         <Link to="/novo-envio" style={mobileNavStyle(isActive('/novo-envio'))}>
           <PackagePlus size={24} />
-          <span style={{ fontSize: '0.7rem', fontWeight: '500' }}>Enviar</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Filial</span>
+        </Link>
+        <Link to="/envio-clientes" style={mobileNavStyle(isActive('/envio-clientes'))}>
+          <Send size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Cliente</span>
+        </Link>
+        <Link to="/compras" style={mobileNavStyle(isActive('/compras'))}>
+          <ShoppingBag size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Compras</span>
         </Link>
         <Link to="/produtos" style={mobileNavStyle(isActive('/produtos'))}>
           <Tag size={24} />
-          <span style={{ fontSize: '0.7rem', fontWeight: '500' }}>Catálogo</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Prod</span>
         </Link>
       </nav>
     </div>
