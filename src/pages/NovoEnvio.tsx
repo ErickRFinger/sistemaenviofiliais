@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { PRODUCTS as STATIC_PRODUCTS } from '../data/products';
-import { Search, Plus, Minus, Send, Trash2, User, Truck, FileText } from 'lucide-react';
+import { Search, Plus, Minus, Send, Trash2, User, Truck, FileText, ShoppingCart, X } from 'lucide-react';
 
 interface CartItem {
     product_id: string;
@@ -29,6 +29,7 @@ export default function NovoEnvio() {
     const [searchTerm, setSearchTerm] = useState('');
     const [cart, setCart] = useState<Record<string, CartItem>>({});
     const [saving, setSaving] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
 
     // Novo State para Catalogo Dinâmico
     const [products, setProducts] = useState<Product[]>([]);
@@ -272,8 +273,8 @@ export default function NovoEnvio() {
                 </div>
             </div>
 
-            {/* Right Column: Checkout/Summary */}
-            <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', position: 'sticky', top: 0, overflowY: 'auto' }}>
+            {/* Right Column: Checkout/Summary (Desktop) */}
+            <div className="glass-panel desktop-only-checkout" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', position: 'sticky', top: 0, overflowY: 'auto' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>Detalhes do Envio</h3>
 
                 {/* Formulário Completo */}
@@ -382,6 +383,134 @@ export default function NovoEnvio() {
                     </button>
                 </div>
             </div>
+
+            {/* --- MOBILE CART DRAWER --- */}
+            {cartArray.length > 0 && (
+                <div className="mobile-checkout-bar" style={{ display: isCartOpen ? 'none' : 'block' }}>
+                    <button
+                        className="btn-primary"
+                        style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', borderRadius: '12px', boxShadow: '0 8px 25px rgba(59, 130, 246, 0.4)' }}
+                        onClick={() => setIsCartOpen(true)}
+                    >
+                        <ShoppingCart size={20} />
+                        Ver Carrinho ({cartArray.reduce((acc, curr) => acc + curr.quantity, 0)} itens)
+                    </button>
+                </div>
+            )}
+
+            <div className={`cart-drawer ${isCartOpen ? 'open' : ''}`}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Detalhes do Envio</h3>
+                    <button onClick={() => setIsCartOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.5rem' }}>
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Destino (Filial):</label>
+                            <select
+                                className="input-glass"
+                                value={branch}
+                                onChange={(e) => setBranch(e.target.value)}
+                                style={{ WebkitAppearance: 'none', appearance: 'none', cursor: 'pointer', fontWeight: '500' }}
+                            >
+                                {FILIAIS.map(f => <option key={f} value={f} style={{ color: 'var(--bg-primary)' }}>{f}</option>)}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                                <User size={14} /> Remetente / Responsável *
+                            </label>
+                            <input
+                                type="text"
+                                className="input-glass"
+                                placeholder="Quem está enviando..."
+                                value={senderName}
+                                onChange={(e) => setSenderName(e.target.value)}
+                            />
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                                <Truck size={14} /> Motorista / Transportadora
+                            </label>
+                            <input
+                                type="text"
+                                className="input-glass"
+                                placeholder="Ex: João (Van), Correios..."
+                                value={driverName}
+                                onChange={(e) => setDriverName(e.target.value)}
+                            />
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                                <FileText size={14} /> Observações
+                            </label>
+                            <textarea
+                                className="input-glass"
+                                placeholder="Detalhes adicionais..."
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                rows={2}
+                                style={{ resize: 'none' }}
+                            />
+                        </div>
+                    </div>
+
+                    <h4 style={{ fontSize: '1rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Produtos a Enviar</h4>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {cartArray.length === 0 ? (
+                            <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '1rem', fontSize: '0.9rem' }}>
+                                Nenhum produto selecionado.
+                            </div>
+                        ) : cartArray.map(item => (
+                            <div key={item.product_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                <div style={{ flex: 1, minWidth: 0, paddingRight: '0.5rem' }}>
+                                    <p style={{ fontSize: '0.85rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.product_name}</p>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{item.product_category}</p>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>x{item.quantity}</span>
+                                    <button
+                                        onClick={() => setCart(prev => { const n = { ...prev }; delete n[item.product_id]; return n; })}
+                                        style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '0.25rem' }}
+                                        title="Remover Item"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Total de Volumes:</span>
+                            <span style={{ fontWeight: '700', fontSize: '1.25rem' }}>{cartArray.reduce((acc, curr) => acc + curr.quantity, 0)}</span>
+                        </div>
+                        <button
+                            className="btn-primary"
+                            style={{ width: '100%', fontSize: '1.1rem', padding: '1rem', borderRadius: '12px' }}
+                            onClick={handleSave}
+                            disabled={saving || cartArray.length === 0}
+                        >
+                            {saving ? 'Registrando...' : (
+                                <>
+                                    <Send size={18} />
+                                    Confirmar Lote de Envio
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {/* --- FIM DRAWER --- */}
+
         </div>
     );
 }
