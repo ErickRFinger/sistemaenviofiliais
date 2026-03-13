@@ -198,7 +198,7 @@ export default function EditarEnvio() {
     }
 
     const checkoutForm = (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'end' }}>
             <div>
                 <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Destino (Filial):</label>
                 <select
@@ -246,7 +246,7 @@ export default function EditarEnvio() {
                     placeholder="Detalhes adicionais..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    rows={2}
+                    rows={1}
                     style={{ resize: 'none' }}
                 />
             </div>
@@ -254,31 +254,35 @@ export default function EditarEnvio() {
     );
 
     return (
-        <div className="animate-fade-in grid-responsive mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 400px', gap: '2rem', height: '100%', alignItems: 'start' }}>
+        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
+            
+            {/* HEADER FIXO NO TOPO */}
+            <div className="glass-panel" style={{ padding: '1.5rem', position: 'sticky', top: 0, zIndex: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <button
+                            onClick={() => navigate('/')}
+                            style={{
+                                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)',
+                                color: 'white', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <div>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Editar Envio</h2>
+                        </div>
+                    </div>
+                </div>
+                {checkoutForm}
+            </div>
+
+            <div className="grid-responsive mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '2rem', flex: 1, alignItems: 'start' }}>
 
             {/* Left Column: Product Selection */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
-                <header style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button
-                        onClick={() => navigate('/')}
-                        style={{
-                            background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)',
-                            color: 'white', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
-                    <div>
-                        <h2 style={{ fontSize: '2rem', fontWeight: '700' }}>Editar Envio</h2>
-                        <p style={{ color: 'var(--text-secondary)' }}>Modificando o pacote de destino e produtos.</p>
-                    </div>
-                </header>
-
-                <div className="mobile-only glass-panel" style={{ padding: '1.25rem' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1rem' }}>1. Preencha os Dados</h3>
-                    {checkoutForm}
-                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Modificar Produtos</h3>
 
                 <div className="glass-panel" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
@@ -397,13 +401,8 @@ export default function EditarEnvio() {
             </div>
 
             {/* Right Column: Checkout/Summary (Desktop) */}
-            <div className="glass-panel desktop-only-checkout" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: 'calc(100vh - 6rem)', position: 'sticky', top: '2rem', overflowY: 'auto' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>Detalhes do Envio</h3>
-
-                {/* Formulário Completo */}
-                {checkoutForm}
-
-                <h4 style={{ fontSize: '1rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginTop: '0.5rem' }}>Produtos do Lote</h4>
+            <div className="glass-panel desktop-only-checkout" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: 'calc(100vh - 14rem)', position: 'sticky', top: '12rem', overflowY: 'auto' }}>
+                <h4 style={{ fontSize: '1.25rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>Carrinho do Lote</h4>
 
                 <div style={{ flex: 1, minHeight: '150px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {cartArray.length === 0 ? (
@@ -526,7 +525,7 @@ export default function EditarEnvio() {
                     </div>
                 </div>
             </div>
-            {/* --- FIM DRAWER --- */}
+            </div>
         </div>
     );
 }
