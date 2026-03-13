@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Package, Truck, Clock, User, FileText, CheckCircle, Edit, Check, Trash2 } from 'lucide-react';
+import { Package, Truck, Clock, User, FileText, CheckCircle, Edit, Check, Trash2, ShoppingBag, Send } from 'lucide-react';
 
 interface ShipmentItem {
     id: string;
@@ -90,6 +90,53 @@ export default function Historico() {
                 <h2 style={{ fontSize: '2rem', fontWeight: '700' }}>Controle de Lotes</h2>
                 <p style={{ color: 'var(--text-secondary)' }}>Gerencie os despachos pendentes e visualize o histórico de recebidos.</p>
             </header>
+
+            {/* Mobile Quick Actions - Dashboard style */}
+            <div className="mobile-only" style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <button 
+                        onClick={() => navigate('/compras')}
+                        className="glass-panel"
+                        style={{
+                            padding: '1.5rem 1rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            cursor: 'pointer',
+                            background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.2))',
+                            border: '1px solid rgba(249, 115, 22, 0.2)',
+                            transition: 'transform 0.2s'
+                        }}
+                    >
+                        <div style={{ background: '#f97316', padding: '0.75rem', borderRadius: '12px', color: 'white' }}>
+                            <ShoppingBag size={24} />
+                        </div>
+                        <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>Compras</span>
+                    </button>
+
+                    <button 
+                        onClick={() => navigate('/envio-clientes')}
+                        className="glass-panel"
+                        style={{
+                            padding: '1.5rem 1rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            cursor: 'pointer',
+                            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.2))',
+                            border: '1px solid rgba(16, 185, 129, 0.2)',
+                            transition: 'transform 0.2s'
+                        }}
+                    >
+                        <div style={{ background: '#10b981', padding: '0.75rem', borderRadius: '12px', color: 'white' }}>
+                            <Send size={24} />
+                        </div>
+                        <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>Envio Clientes</span>
+                    </button>
+                </div>
+            </div>
 
             {/* Tabs */}
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
