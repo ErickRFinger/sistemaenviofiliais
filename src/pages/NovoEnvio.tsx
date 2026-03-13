@@ -141,7 +141,7 @@ export default function NovoEnvio() {
     };
 
     return (
-        <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
+        <div className="animate-fade-in" style={{ paddingBottom: '4rem' }}>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>Novo Envio</h2>

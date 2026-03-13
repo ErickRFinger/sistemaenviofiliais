@@ -144,6 +144,7 @@ body {
 .app-container {
   display: flex;
   height: 100vh;
+  height: 100dvh;
 }
 
 .main-content {
@@ -188,7 +189,7 @@ body {
 
   .main-content {
     padding: 1rem;
-    padding-bottom: 5rem;
+    padding-bottom: 8rem;
   }
 
   /* Break grids into single vertical columns */
@@ -225,14 +226,16 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    min-height: 64px;
+    height: calc(64px + env(safe-area-inset-bottom));
     background: var(--bg-primary);
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    z-index: 50;
+    z-index: 100;
     padding-bottom: env(safe-area-inset-bottom);
+    backdrop-filter: blur(10px);
   }
 
   .desktop-sidebar {

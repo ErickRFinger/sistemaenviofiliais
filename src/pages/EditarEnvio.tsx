@@ -197,7 +197,7 @@ export default function EditarEnvio() {
     }
 
     return (
-        <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
+        <div className="animate-fade-in" style={{ paddingBottom: '4rem' }}>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                 <button
