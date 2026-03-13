@@ -138,6 +138,32 @@ export default function Compras() {
         setIsAddingItem(false);
     };
 
+    const handleDeleteItem = async (itemId: string) => {
+        if (!window.confirm('Deseja realmente excluir este produto?')) return;
+
+        const { error } = await supabase
+            .from('supplier_items')
+            .delete()
+            .eq('id', itemId);
+
+        if (error) {
+            alert('Erro ao excluir item: ' + error.message);
+        } else {
+            setSuppliers(prev => prev.map(s => ({
+                ...s,
+                supplier_items: s.supplier_items?.filter(i => i.id !== itemId)
+            })));
+            
+            setSelectedSupplier(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    supplier_items: prev.supplier_items?.filter(i => i.id !== itemId)
+                };
+            });
+        }
+    };
+
     const handleWhatsApp = () => {
         if (!selectedSupplier) return;
         
@@ -413,12 +439,19 @@ export default function Compras() {
                                             transition: 'all 0.2s'
                                         }}
                                     >
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                                             <span style={{ fontWeight: '600', color: 'white' }}>{item.name}</span>
                                             {item.sku && <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: '700' }}>CÓD: {item.sku}</span>}
                                         </div>
 
-                                        {!isManageMode && (
+                                        {isManageMode ? (
+                                            <button 
+                                                onClick={() => handleDeleteItem(item.id)}
+                                                style={{ border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', cursor: 'pointer', padding: '0.5rem', borderRadius: '8px' }}
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        ) : (
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(0,0,0,0.2)', padding: '0.3rem', borderRadius: '10px' }}>
                                                 <button 
                                                     onClick={() => updateQuantity(item.name, -1)}
