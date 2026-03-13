@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Phone, MapPin, Wrench, Headset, Send, Flag, AlignLeft, Clipboard, Trash2, ShieldCheck, Zap } from 'lucide-react';
+import { User, Phone, MapPin, Wrench, Headset, Send, AlignLeft, Clipboard, Trash2, ShieldCheck, Zap } from 'lucide-react';
 
 export default function EnvioClientes() {
     const [solicitante, setSolicitante] = useState('');
