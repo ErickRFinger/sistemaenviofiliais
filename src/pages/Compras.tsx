@@ -1,110 +1,233 @@
-import { useState } from 'react';
-import { suppliers } from '../data/suppliers';
-import { Phone, MapPin, Package, Search, Building2, ShoppingBag } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { Phone, MapPin, Package, Search, Building2, ShoppingBag, X, Check, Plus, Loader2 } from 'lucide-react';
+
+interface SupplierItem {
+    id: string;
+    name: string;
+}
+
+interface Supplier {
+    id: string;
+    name: string;
+    phone: string;
+    city: string;
+    region: string;
+    category: string;
+    supplier_items?: SupplierItem[];
+}
 
 export default function Compras() {
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCity, setSelectedCity] = useState<string>('all');
+    
+    // Modal states
+    const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    // Management states
+    const [isManageMode, setIsManageMode] = useState(false);
+    const [newItemName, setNewItemName] = useState('');
+    const [isAddingItem, setIsAddingItem] = useState(false);
 
-    // Extract unique cities for filter
+    useEffect(() => {
+        fetchSuppliers();
+    }, []);
+
+    async function fetchSuppliers() {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('suppliers')
+            .select('*, supplier_items(*)');
+
+        if (error) {
+            console.error('Erro ao buscar fornecedores:', error);
+        } else {
+            // Sort items alphabetically
+            const sortedData = (data || []).map((s: Supplier) => ({
+                ...s,
+                supplier_items: s.supplier_items?.sort((a, b) => a.name.localeCompare(b.name))
+            }));
+            setSuppliers(sortedData);
+        }
+        setLoading(false);
+    }
+
     const cities = ['all', ...new Set(suppliers.map(s => s.city))];
 
     const filteredSuppliers = suppliers.filter(supplier => {
         const matchesSearch =
             supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            supplier.product.toLowerCase().includes(searchTerm.toLowerCase());
+            supplier.category.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCity = selectedCity === 'all' || supplier.city === selectedCity;
         return matchesSearch && matchesCity;
     });
 
-    const handleWhatsApp = (phone: string, product: string) => {
-        const message = `Olá, gostaria de fazer um pedido de ${product}.`;
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    const openOrderModal = (supplier: Supplier) => {
+        setSelectedSupplier(supplier);
+        setSelectedItems(new Set());
+        setNewItemName('');
+        setIsModalOpen(true);
+    };
+
+    const toggleItem = (itemName: string) => {
+        const newSet = new Set(selectedItems);
+        if (newSet.has(itemName)) {
+            newSet.delete(itemName);
+        } else {
+            newSet.add(itemName);
+        }
+        setSelectedItems(newSet);
+    };
+
+    const handleAddItem = async () => {
+        if (!selectedSupplier || !newItemName.trim() || isAddingItem) return;
+
+        setIsAddingItem(true);
+        const { data, error } = await supabase
+            .from('supplier_items')
+            .insert([{
+                supplier_id: selectedSupplier.id,
+                name: newItemName.trim()
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            alert('Erro ao adicionar item: ' + error.message);
+        } else {
+            // Update local state
+            setSuppliers(prev => prev.map(s => {
+                if (s.id === selectedSupplier.id) {
+                    return {
+                        ...s,
+                        supplier_items: [...(s.supplier_items || []), data].sort((a, b) => a.name.localeCompare(b.name))
+                    };
+                }
+                return s;
+            }));
+            
+            // Update selected supplier in modal
+            setSelectedSupplier(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    supplier_items: [...(prev.supplier_items || []), data].sort((a, b) => a.name.localeCompare(b.name))
+                };
+            });
+            
+            setNewItemName('');
+        }
+        setIsAddingItem(false);
+    };
+
+    const handleWhatsApp = () => {
+        if (!selectedSupplier) return;
+        
+        const itemsList = Array.from(selectedItems);
+        let message = '';
+        
+        if (itemsList.length > 0) {
+            message = `Olá, gostaria de fazer um pedido dos seguintes itens:\n\n${itemsList.map(item => `• ${item}`).join('\n')}`;
+        } else {
+            message = `Olá, gostaria de consultar preços de produtos.`;
+        }
+        
+        window.open(`https://wa.me/${selectedSupplier.phone}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
     return (
         <div className="animate-fade-in" style={{ paddingBottom: '4rem' }}>
-            <header style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                    <div style={{ 
-                        background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.4))', 
-                        padding: '1rem', 
-                        borderRadius: '16px', 
-                        color: '#fb923c',
-                        boxShadow: '0 8px 32px rgba(249, 115, 22, 0.15)',
-                        border: '1px solid rgba(249, 115, 22, 0.2)'
-                    }}>
-                        <ShoppingBag size={28} />
+            <header style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                        <div style={{ 
+                            background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.4))', 
+                            padding: '1rem', 
+                            borderRadius: '16px', 
+                            color: '#fb923c',
+                            boxShadow: '0 8px 30px rgba(249, 115, 22, 0.2)',
+                            border: '1px solid rgba(249, 115, 22, 0.2)'
+                        }}>
+                            <ShoppingBag size={28} />
+                        </div>
+                        <div>
+                            <h2 style={{ fontSize: '2.25rem', fontWeight: '800', letterSpacing: '-0.025em', color: 'white' }}>
+                                Compras Premium
+                            </h2>
+                            <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Gestão inteligente de fornecedores e cotações.</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 style={{ fontSize: '2.25rem', fontWeight: '800', letterSpacing: '-0.025em', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Compras Premium
-                        </h2>
-                        <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Gestão de fornecedores e pedidos estratégicos.</p>
-                    </div>
+                    
+                    <button 
+                        onClick={() => setIsManageMode(!isManageMode)}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            borderRadius: '12px',
+                            background: isManageMode ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.05)',
+                            color: isManageMode ? 'var(--accent)' : 'var(--text-secondary)',
+                            border: '1px solid ' + (isManageMode ? 'var(--accent)' : 'var(--border)'),
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                        }}
+                    >
+                        {isManageMode ? <Check size={18} /> : <X size={18} style={{ transform: 'rotate(45deg)' }} />}
+                        {isManageMode ? 'Concluir Gestão' : 'Gerenciar Produtos'}
+                    </button>
                 </div>
             </header>
 
-            {/* Filters & Search - Enhanced Glass */}
-            <div className="glass-panel" style={{ 
-                padding: '2rem', 
-                marginBottom: '2.5rem', 
-                background: 'rgba(255, 255, 255, 0.02)', 
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
-            }}>
+            {/* Filters & Search */}
+            <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2.5rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', alignItems: 'end' }}>
-                    <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Buscar Fornecedor:</label>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+                            Buscar Fornecedor ou Categoria
+                        </label>
                         <div style={{ position: 'relative' }}>
-                            <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent)' }} />
+                            <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent)' }} />
                             <input
                                 type="text"
                                 className="input-glass"
-                                placeholder="Nome, cabo, fonte, alarme..."
+                                placeholder="Ex: Adelaide, Cabos, Alarmes..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ 
-                                    paddingLeft: '3.25rem', 
-                                    height: '56px', 
-                                    fontSize: '1rem',
-                                    background: 'rgba(0,0,0,0.3)',
-                                    borderColor: 'rgba(255,255,255,0.1)'
-                                }}
+                                style={{ paddingLeft: '3rem', height: '54px' }}
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cidades:</label>
-                        <div style={{ 
-                            display: 'flex', 
-                            gap: '0.75rem', 
-                            overflowX: 'auto', 
-                            paddingBottom: '0.75rem', 
-                            scrollbarWidth: 'none',
-                            msOverflowStyle: 'none'
-                        }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+                            Filtrar por Cidade
+                        </label>
+                        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
                             {cities.map(city => (
                                 <button
                                     key={city}
                                     onClick={() => setSelectedCity(city)}
                                     style={{
-                                        padding: '0.75rem 1.5rem',
-                                        borderRadius: '14px',
+                                        padding: '0.6rem 1.25rem',
+                                        borderRadius: '12px',
                                         fontSize: '0.9rem',
-                                        fontWeight: '700',
+                                        fontWeight: '600',
                                         whiteSpace: 'nowrap',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        background: selectedCity === city ? 'linear-gradient(135deg, var(--accent), #1d4ed8)' : 'rgba(255,255,255,0.03)',
+                                        background: selectedCity === city ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
                                         color: selectedCity === city ? 'white' : 'var(--text-secondary)',
-                                        border: '1px solid ' + (selectedCity === city ? 'var(--accent)' : 'rgba(255,255,255,0.1)'),
-                                        boxShadow: selectedCity === city ? '0 8px 20px rgba(59, 130, 246, 0.3)' : 'none',
-                                        transform: selectedCity === city ? 'scale(1.05)' : 'scale(1)'
+                                        border: '1px solid ' + (selectedCity === city ? 'var(--accent)' : 'var(--border)'),
+                                        transition: 'all 0.2s',
+                                        cursor: 'pointer'
                                     }}
                                 >
-                                    {city === 'all' ? '🌎 Todas' : city}
+                                    {city === 'all' ? 'Todas' : city}
                                 </button>
                             ))}
                         </div>
@@ -112,102 +235,154 @@ export default function Compras() {
                 </div>
             </div>
 
-            {/* Suppliers Grid - Vibrant Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
-                {filteredSuppliers.map((supplier) => (
-                    <div key={supplier.id} className="glass-panel glass-card" style={{ 
-                        padding: '2rem', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        gap: '1.25rem',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        background: 'rgba(30, 41, 59, 0.4)'
-                    }}>
-                        {/* Decorative Gradient Blob */}
-                        <div style={{ 
-                            position: 'absolute', 
-                            top: '-20px', 
-                            right: '-20px', 
-                            width: '100px', 
-                            height: '100px', 
-                            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)',
-                            zIndex: 0
-                        }} />
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', position: 'relative', zIndex: 1 }}>
-                            <div style={{ 
-                                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.4))', 
-                                padding: '0.75rem', 
-                                borderRadius: '12px', 
-                                color: '#60a5fa',
-                                border: '1px solid rgba(59, 130, 246, 0.2)'
-                            }}>
-                                <Building2 size={24} />
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '4rem' }}>
+                    <Loader2 size={40} className="animate-spin" style={{ margin: '0 auto', color: 'var(--accent)' }} />
+                    <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Carregando fornecedores...</p>
+                </div>
+            ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                    {filteredSuppliers.map((supplier) => (
+                        <div key={supplier.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.5rem', borderRadius: '10px', color: 'var(--accent)' }}>
+                                        <Building2 size={20} />
+                                    </div>
+                                    <h3 style={{ fontSize: '1.15rem', fontWeight: '700' }}>{supplier.name}</h3>
+                                </div>
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'white', letterSpacing: '-0.01em' }}>{supplier.name}</h3>
+
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '6px', background: 'rgba(249, 115, 22, 0.14)', color: '#fb923c', fontWeight: '600', border: '1px solid rgba(249, 115, 22, 0.2)' }}>
+                                    {supplier.category}
+                                </span>
+                                <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+                                    {supplier.region}
+                                </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                <MapPin size={14} />
+                                {supplier.city}
+                            </div>
+
+                            <button
+                                onClick={() => openOrderModal(supplier)}
+                                className="btn-primary"
+                                style={{ 
+                                    marginTop: '1rem', 
+                                    width: '100%', 
+                                    height: '48px', 
+                                    background: isManageMode ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' : 'linear-gradient(135deg, #f97316, #ea580c)',
+                                    boxShadow: isManageMode ? '0 10px 20px rgba(59, 130, 246, 0.3)' : '0 10px 20px rgba(249, 115, 22, 0.3)'
+                                }}
+                            >
+                                {isManageMode ? <Plus size={18} /> : <Package size={18} />}
+                                {isManageMode ? 'Gerenciar Produtos' : 'Fazer Pedido'}
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Modal de Pedido / Gestão */}
+            {isModalOpen && selectedSupplier && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+                    zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '1rem'
+                }}>
+                    <div className="glass-panel animate-fade-in" style={{
+                        width: '100%', maxWidth: '500px', maxHeight: '90vh',
+                        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>{selectedSupplier.name}</h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                    {isManageMode ? 'Adicionar novos itens' : 'Selecione os itens para o pedido'}
+                                </p>
+                            </div>
+                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                                <X size={24} />
+                            </button>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem', position: 'relative', zIndex: 1 }}>
-                            <div style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '1rem', 
-                                background: 'rgba(249, 115, 22, 0.05)', 
-                                padding: '0.75rem 1rem', 
-                                borderRadius: '12px',
-                                border: '1px solid rgba(249, 115, 22, 0.1)'
-                            }}>
-                                <Package size={20} style={{ color: '#fb923c' }} />
-                                <span style={{ fontWeight: '600', color: '#fed7aa', fontSize: '0.95rem' }}>{supplier.product}</span>
+                        {/* Add New Item Section (only in Manage Mode) */}
+                        {isManageMode && (
+                            <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', background: 'rgba(59, 130, 246, 0.03)' }}>
+                                <p style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Novo Produto:</p>
+                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                    <input 
+                                        type="text"
+                                        className="input-glass"
+                                        placeholder="Nome do produto..."
+                                        value={newItemName}
+                                        onChange={(e) => setNewItemName(e.target.value)}
+                                        style={{ height: '48px', flex: 1 }}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
+                                    />
+                                    <button 
+                                        onClick={handleAddItem}
+                                        disabled={isAddingItem || !newItemName.trim()}
+                                        className="btn-primary"
+                                        style={{ width: '48px', height: '48px', padding: 0 }}
+                                    >
+                                        {isAddingItem ? <Loader2 size={20} className="animate-spin" /> : <Plus size={24} />}
+                                    </button>
+                                </div>
                             </div>
+                        )}
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', paddingLeft: '0.5rem' }}>
-                                <MapPin size={18} style={{ color: '#94a3b8' }} />
-                                <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{supplier.city} • <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>{supplier.region}</span></span>
-                            </div>
+                        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            {selectedSupplier.supplier_items && selectedSupplier.supplier_items.length > 0 ? (
+                                selectedSupplier.supplier_items.map(item => (
+                                    <button
+                                        key={item.id}
+                                        disabled={isManageMode}
+                                        onClick={() => toggleItem(item.name)}
+                                        style={{
+                                            padding: '1rem',
+                                            borderRadius: '12px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            background: !isManageMode && selectedItems.has(item.name) ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
+                                            border: '1px solid ' + (!isManageMode && selectedItems.has(item.name) ? 'var(--accent)' : 'var(--border)'),
+                                            color: !isManageMode && selectedItems.has(item.name) ? 'white' : 'var(--text-secondary)',
+                                            transition: 'all 0.2s',
+                                            cursor: isManageMode ? 'default' : 'pointer'
+                                        }}
+                                    >
+                                        <span style={{ fontWeight: !isManageMode && selectedItems.has(item.name) ? '600' : '400' }}>{item.name}</span>
+                                        {!isManageMode && selectedItems.has(item.name) && (
+                                            <div style={{ background: 'var(--accent)', borderRadius: '50%', padding: '0.1rem', color: 'white' }}>
+                                                <Check size={14} />
+                                            </div>
+                                        )}
+                                    </button>
+                                ))
+                            ) : (
+                                <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>Nenhum item cadastrado.</p>
+                            )}
                         </div>
 
-                        <button
-                            onClick={() => handleWhatsApp(supplier.phone, supplier.product)}
-                            className="btn-primary"
-                            style={{ 
-                                marginTop: '1.5rem', 
-                                width: '100%', 
-                                height: '52px',
-                                background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                                boxShadow: '0 10px 25px rgba(249, 115, 22, 0.4)',
-                                fontSize: '1rem',
-                                fontWeight: '700',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                position: 'relative',
-                                zIndex: 1
-                            }}
-                        >
-                            <Phone size={20} />
-                            Fazer Pedido de Compra
-                        </button>
+                        {!isManageMode && (
+                            <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+                                <button
+                                    onClick={handleWhatsApp}
+                                    className="btn-primary"
+                                    style={{ width: '100%', height: '54px', background: 'linear-gradient(135deg, #10b981, #059669)', fontSize: '1rem' }}
+                                >
+                                    <Phone size={20} />
+                                    Enviar Pedido ({selectedItems.size} {selectedItems.size === 1 ? 'item' : 'itens'})
+                                </button>
+                            </div>
+                        )}
                     </div>
-                ))}
-            </div>
-
-            {filteredSuppliers.length === 0 && (
-                <div className="glass-panel" style={{ padding: '6rem 2rem', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>
-                    <div style={{ 
-                        width: '80px', 
-                        height: '80px', 
-                        background: 'rgba(255,255,255,0.03)', 
-                        borderRadius: '50%', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        margin: '0 auto 1.5rem',
-                        border: '1px solid rgba(255,255,255,0.05)'
-                    }}>
-                        <Search size={40} style={{ color: 'var(--text-secondary)', opacity: 0.4 }} />
-                    </div>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Nenhum fornecedor encontrado</h3>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '1.1rem' }}>Refine sua busca ou tente outra cidade.</p>
                 </div>
             )}
         </div>
