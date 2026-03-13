@@ -197,6 +197,62 @@ export default function EditarEnvio() {
         return <div style={{ padding: '3rem', textAlign: 'center' }}>Carregando dados para edição...</div>;
     }
 
+    const checkoutForm = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Destino (Filial):</label>
+                <select
+                    className="input-glass"
+                    value={branch}
+                    onChange={(e) => setBranch(e.target.value)}
+                    style={{ WebkitAppearance: 'none', appearance: 'none', cursor: 'pointer', fontWeight: '500' }}
+                >
+                    {FILIAIS.map(f => <option key={f} value={f} style={{ color: 'var(--bg-primary)' }}>{f}</option>)}
+                </select>
+            </div>
+
+            <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                    <User size={14} /> Remetente / Responsável *
+                </label>
+                <input
+                    type="text"
+                    className="input-glass"
+                    placeholder="Quem está enviando..."
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                />
+            </div>
+
+            <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                    <Truck size={14} /> Motorista / Transportadora
+                </label>
+                <input
+                    type="text"
+                    className="input-glass"
+                    placeholder="Ex: João (Van), Correios..."
+                    value={driverName}
+                    onChange={(e) => setDriverName(e.target.value)}
+                />
+            </div>
+
+            <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                    <FileText size={14} /> Observações
+                </label>
+                <textarea
+                    className="input-glass"
+                    placeholder="Detalhes adicionais..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={2}
+                    style={{ resize: 'none' }}
+                />
+            </div>
+        </div>
+    );
+
     return (
         <div className="animate-fade-in grid-responsive mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 400px', gap: '2rem', height: '100%', alignItems: 'start' }}>
 
@@ -218,6 +274,11 @@ export default function EditarEnvio() {
                         <p style={{ color: 'var(--text-secondary)' }}>Modificando o pacote de destino e produtos.</p>
                     </div>
                 </header>
+
+                <div className="mobile-only glass-panel" style={{ padding: '1.25rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1rem' }}>1. Preencha os Dados</h3>
+                    {checkoutForm}
+                </div>
 
                 <div className="glass-panel" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
@@ -336,63 +397,11 @@ export default function EditarEnvio() {
             </div>
 
             {/* Right Column: Checkout/Summary (Desktop) */}
-            <div className="glass-panel desktop-only-checkout" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', position: 'sticky', top: 0, overflowY: 'auto' }}>
+            <div className="glass-panel desktop-only-checkout" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: 'calc(100vh - 6rem)', position: 'sticky', top: '2rem', overflowY: 'auto' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>Detalhes do Envio</h3>
 
                 {/* Formulário Completo */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Destino (Filial):</label>
-                        <select
-                            className="input-glass"
-                            value={branch}
-                            onChange={(e) => setBranch(e.target.value)}
-                            style={{ WebkitAppearance: 'none', appearance: 'none', cursor: 'pointer', fontWeight: '500' }}
-                        >
-                            {FILIAIS.map(f => <option key={f} value={f} style={{ color: 'var(--bg-primary)' }}>{f}</option>)}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                            <User size={14} /> Remetente / Responsável *
-                        </label>
-                        <input
-                            type="text"
-                            className="input-glass"
-                            placeholder="Quem está enviando..."
-                            value={senderName}
-                            onChange={(e) => setSenderName(e.target.value)}
-                        />
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                            <Truck size={14} /> Motorista / Transportadora
-                        </label>
-                        <input
-                            type="text"
-                            className="input-glass"
-                            placeholder="Ex: João (Van), Correios..."
-                            value={driverName}
-                            onChange={(e) => setDriverName(e.target.value)}
-                        />
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                            <FileText size={14} /> Observações
-                        </label>
-                        <textarea
-                            className="input-glass"
-                            placeholder="Detalhes adicionais..."
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            rows={2}
-                            style={{ resize: 'none' }}
-                        />
-                    </div>
-                </div>
+                {checkoutForm}
 
                 <h4 style={{ fontSize: '1rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginTop: '0.5rem' }}>Produtos do Lote</h4>
 
@@ -469,61 +478,7 @@ export default function EditarEnvio() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Destino (Filial):</label>
-                            <select
-                                className="input-glass"
-                                value={branch}
-                                onChange={(e) => setBranch(e.target.value)}
-                                style={{ WebkitAppearance: 'none', appearance: 'none', cursor: 'pointer', fontWeight: '500' }}
-                            >
-                                {FILIAIS.map(f => <option key={f} value={f} style={{ color: 'var(--bg-primary)' }}>{f}</option>)}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                                <User size={14} /> Remetente / Responsável *
-                            </label>
-                            <input
-                                type="text"
-                                className="input-glass"
-                                placeholder="Quem está enviando..."
-                                value={senderName}
-                                onChange={(e) => setSenderName(e.target.value)}
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                                <Truck size={14} /> Motorista / Transportadora
-                            </label>
-                            <input
-                                type="text"
-                                className="input-glass"
-                                placeholder="Ex: João (Van), Correios..."
-                                value={driverName}
-                                onChange={(e) => setDriverName(e.target.value)}
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                                <FileText size={14} /> Observações
-                            </label>
-                            <textarea
-                                className="input-glass"
-                                placeholder="Detalhes adicionais..."
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                rows={2}
-                                style={{ resize: 'none' }}
-                            />
-                        </div>
-                    </div>
-
-                    <h4 style={{ fontSize: '1rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Produtos do Lote</h4>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: '600', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>📦 Produtos do Lote</h4>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         {cartArray.length === 0 ? (

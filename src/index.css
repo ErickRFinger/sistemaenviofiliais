@@ -171,8 +171,17 @@ body {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
+.mobile-only {
+  display: none !important;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+  .mobile-only {
+    display: flex !important;
+    flex-direction: column;
+  }
+
   .app-container {
     flex-direction: column;
   }
