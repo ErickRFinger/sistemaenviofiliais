@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS supplier_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     supplier_id UUID REFERENCES suppliers(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    sku TEXT, -- Código do produto
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
