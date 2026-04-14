@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vigi1.png'],
+      includeAssets: ['vigi1.png', 'pwa-192x192.png', 'pwa-512x512.png', 'apple-touch-icon.png', 'favicon.ico'],
       manifest: {
         name: 'VIGI Envios',
         short_name: 'VIGI Envios',
@@ -17,17 +17,17 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'vigi1.png',
+            src: 'pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'vigi1.png',
+            src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'vigi1.png',
+            src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
