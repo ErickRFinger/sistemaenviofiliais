@@ -109,7 +109,7 @@ export default function Demandas() {
     };
 
     return (
-        <div className="animate-fade-in" style={{ paddingBottom: '4rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ paddingBottom: '4rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <header style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
