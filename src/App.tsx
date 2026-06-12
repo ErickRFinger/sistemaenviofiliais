@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PackagePlus, Tag, ShoppingBag, Send } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, Tag, ShoppingBag, Send, ClipboardList } from 'lucide-react';
 import './index.css';
 
 // Lazy loading could be used here, but for simplicity we import directly for now
@@ -10,6 +10,7 @@ import EditarEnvio from './pages/EditarEnvio';
 import GerenciarProdutos from './pages/GerenciarProdutos';
 import Compras from './pages/Compras';
 import EnvioClientes from './pages/EnvioClientes';
+import Demandas from './pages/Demandas';
 
 function Sidebar() {
   const location = useLocation();
@@ -83,6 +84,14 @@ function Sidebar() {
           <Send size={20} />
           Envio Clientes
         </Link>
+        <Link
+          to="/demandas"
+          className={`nav-link ${location.pathname === '/demandas' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/demandas')}
+        >
+          <ClipboardList size={20} />
+          Demandas
+        </Link>
       </nav>
 
       <div style={{ marginTop: 'auto', padding: '1rem', textAlign: 'center' }}>
@@ -135,6 +144,7 @@ function InnerApp() {
           <Route path="/produtos" element={<GerenciarProdutos />} />
           <Route path="/compras" element={<Compras />} />
           <Route path="/envio-clientes" element={<EnvioClientes />} />
+          <Route path="/demandas" element={<Demandas />} />
         </Routes>
       </main>
 
@@ -159,6 +169,10 @@ function InnerApp() {
         <Link to="/produtos" style={mobileNavStyle(isActive('/produtos'))}>
           <Tag size={24} />
           <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Prod</span>
+        </Link>
+        <Link to="/demandas" style={mobileNavStyle(isActive('/demandas'))}>
+          <ClipboardList size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Demandas</span>
         </Link>
       </nav>
     </div>

@@ -34,6 +34,7 @@ const FORNECEDORES: Supplier[] = [
     { name: 'SUL STILUS', city: 'GUARACIABA', region: 'MATRIZ', category: 'CAIXINHAS', phone: '11914185245' },
     { name: 'GILTAR', city: 'GUARACIABA', region: 'MATRIZ', category: 'CAIXINHAS', phone: '47997592570' },
     { name: 'ALINE VOLTZ', city: 'GUARACIABA', region: 'MATRIZ', category: 'CAIXAS METÁLICAS', phone: '44988240755' },
+    { name: 'KONEXTOP', city: 'GUARACIABA', region: 'MATRIZ', category: 'ELETRODUTO', phone: '4791727503' },
 ];
 
 export default function Compras() {
