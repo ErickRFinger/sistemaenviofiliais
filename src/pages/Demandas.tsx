@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, X, Loader2, ClipboardList, Clock, PlayCircle, CheckCircle2, MoreVertical, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, X, Loader2, ClipboardList, Clock, PlayCircle, CheckCircle2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Demanda {
     id: string;
