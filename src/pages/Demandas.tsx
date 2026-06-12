@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, X, Loader2, ClipboardList, Clock, PlayCircle, CheckCircle2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, X, Loader2, ClipboardList, Clock, PlayCircle, CheckCircle2, Trash2 } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface Demanda {
     id: string;
@@ -79,9 +80,28 @@ export default function Demandas() {
         }
     };
 
-    const moveCard = async (id: string, newStatus: string) => {
-        setDemandas(prev => prev.map(d => d.id === id ? { ...d, status: newStatus as any } : d)); // Optimistic UI
-        const { error } = await supabase.from('demands').update({ status: newStatus }).eq('id', id);
+    const onDragEnd = async (result: DropResult) => {
+        const { destination, source, draggableId } = result;
+
+        if (!destination) return;
+
+        // Se soltou na mesma coluna, apenas ignora pois não temos ordenação persistente ainda
+        if (destination.droppableId === source.droppableId) {
+            return;
+        }
+
+        const newStatus = destination.droppableId as Demanda['status'];
+        
+        // Optimistic UI
+        setDemandas(prev => prev.map(d => 
+            d.id === draggableId ? { ...d, status: newStatus } : d
+        ));
+
+        const { error } = await supabase
+            .from('demands')
+            .update({ status: newStatus })
+            .eq('id', draggableId);
+
         if (error) {
             alert('Erro ao mover: ' + error.message);
             fetchDemandas(); // Revert on error
@@ -127,110 +147,104 @@ export default function Demandas() {
                     <Loader2 size={40} className="animate-spin" style={{ color: 'var(--accent)' }} />
                 </div>
             ) : (
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '1.5rem', 
-                    overflowX: 'auto', 
-                    paddingBottom: '1rem',
-                    flex: 1,
-                    alignItems: 'flex-start',
-                    WebkitOverflowScrolling: 'touch'
-                }}>
-                    {COLUMNS.map((col, colIndex) => {
-                        const colDemandas = demandas.filter(d => d.status === col.id);
-                        return (
-                            <div key={col.id} className="glass-panel" style={{ 
-                                minWidth: '320px', 
-                                width: '320px',
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                maxHeight: 'calc(100vh - 200px)',
-                                padding: '1rem'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
-                                    <div style={{ background: col.bg, padding: '0.5rem', borderRadius: '10px', color: col.color }}>
-                                        <col.icon size={20} />
-                                    </div>
-                                    <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'white', flex: 1 }}>{col.label}</h3>
-                                    <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700' }}>
-                                        {colDemandas.length}
-                                    </span>
-                                </div>
-
-                                <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, paddingRight: '0.5rem' }}>
-                                    {colDemandas.length === 0 ? (
-                                        <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.5, border: '1px dashed var(--border)', borderRadius: '12px' }}>
-                                            <p style={{ fontSize: '0.85rem' }}>Nenhuma demanda</p>
-                                        </div>
-                                    ) : (
-                                        colDemandas.map(demanda => (
-                                            <div key={demanda.id} style={{
-                                                background: 'rgba(255,255,255,0.03)',
-                                                border: '1px solid rgba(255,255,255,0.08)',
-                                                borderRadius: '14px',
-                                                padding: '1.25rem',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                gap: '0.75rem',
-                                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                                                transition: 'all 0.2s ease',
-                                            }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <h4 style={{ fontWeight: '600', color: 'white', fontSize: '1rem', lineHeight: '1.4' }}>
-                                                        {demanda.title}
-                                                    </h4>
-                                                    <button 
-                                                        onClick={() => handleDelete(demanda.id)}
-                                                        style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem' }}
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <div style={{ 
+                        display: 'flex', 
+                        gap: '1.5rem', 
+                        overflowX: 'auto', 
+                        paddingBottom: '1rem',
+                        flex: 1,
+                        alignItems: 'flex-start',
+                        WebkitOverflowScrolling: 'touch'
+                    }}>
+                        {COLUMNS.map((col) => {
+                            const colDemandas = demandas.filter(d => d.status === col.id);
+                            return (
+                                <Droppable droppableId={col.id} key={col.id}>
+                                    {(provided, snapshot) => (
+                                        <div 
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className="glass-panel" 
+                                            style={{ 
+                                                minWidth: '320px', 
+                                                width: '320px',
+                                                display: 'flex', 
+                                                flexDirection: 'column', 
+                                                maxHeight: 'calc(100vh - 200px)',
+                                                padding: '1rem',
+                                                border: snapshot.isDraggingOver ? `1px solid ${col.color}` : '1px solid rgba(255,255,255,0.05)',
+                                                transition: 'border 0.2s ease',
+                                                background: snapshot.isDraggingOver ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.01)'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+                                                <div style={{ background: col.bg, padding: '0.5rem', borderRadius: '10px', color: col.color }}>
+                                                    <col.icon size={20} />
                                                 </div>
-                                                
-                                                {demanda.description && (
-                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
-                                                        {demanda.description}
-                                                    </p>
-                                                )}
-
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                                                        {new Date(demanda.created_at).toLocaleDateString('pt-BR')}
-                                                    </span>
-                                                    
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <button 
-                                                            onClick={() => moveCard(demanda.id, COLUMNS[colIndex - 1].id)}
-                                                            disabled={colIndex === 0}
-                                                            style={{ 
-                                                                background: colIndex === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.1)', 
-                                                                border: 'none', borderRadius: '6px', padding: '0.4rem', 
-                                                                color: colIndex === 0 ? 'rgba(255,255,255,0.2)' : 'white', cursor: colIndex === 0 ? 'not-allowed' : 'pointer' 
-                                                            }}
-                                                        >
-                                                            <ChevronLeft size={16} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => moveCard(demanda.id, COLUMNS[colIndex + 1].id)}
-                                                            disabled={colIndex === COLUMNS.length - 1}
-                                                            style={{ 
-                                                                background: colIndex === COLUMNS.length - 1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.1)', 
-                                                                border: 'none', borderRadius: '6px', padding: '0.4rem', 
-                                                                color: colIndex === COLUMNS.length - 1 ? 'rgba(255,255,255,0.2)' : 'white', cursor: colIndex === COLUMNS.length - 1 ? 'not-allowed' : 'pointer' 
-                                                            }}
-                                                        >
-                                                            <ChevronRight size={16} />
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'white', flex: 1 }}>{col.label}</h3>
+                                                <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700' }}>
+                                                    {colDemandas.length}
+                                                </span>
                                             </div>
-                                        ))
+
+                                            <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, paddingRight: '0.5rem', minHeight: '100px' }}>
+                                                {colDemandas.map((demanda, index) => (
+                                                    <Draggable key={demanda.id} draggableId={demanda.id} index={index}>
+                                                        {(provided, snapshot) => (
+                                                            <div 
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                style={{
+                                                                    background: snapshot.isDragging ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.03)',
+                                                                    border: snapshot.isDragging ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(255,255,255,0.08)',
+                                                                    borderRadius: '14px',
+                                                                    padding: '1.25rem',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    gap: '0.75rem',
+                                                                    boxShadow: snapshot.isDragging ? '0 20px 25px -5px rgba(0, 0, 0, 0.3)' : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                                                    transition: snapshot.isDragging ? 'none' : 'background 0.2s ease, border 0.2s ease',
+                                                                    ...provided.draggableProps.style
+                                                                }}
+                                                            >
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                    <h4 style={{ fontWeight: '600', color: 'white', fontSize: '1rem', lineHeight: '1.4' }}>
+                                                                        {demanda.title}
+                                                                    </h4>
+                                                                    <button 
+                                                                        onClick={() => handleDelete(demanda.id)}
+                                                                        style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem' }}
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
+                                                                
+                                                                {demanda.description && (
+                                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                                                                        {demanda.description}
+                                                                    </p>
+                                                                )}
+
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                                                        {new Date(demanda.created_at).toLocaleDateString('pt-BR')}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                ))}
+                                                {provided.placeholder}
+                                            </div>
+                                        </div>
                                     )}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                                </Droppable>
+                            );
+                        })}
+                    </div>
+                </DragDropContext>
             )}
 
             {/* Modal Nova Demanda */}
