@@ -10,7 +10,6 @@ import EditarEnvio from './pages/EditarEnvio';
 import GerenciarProdutos from './pages/GerenciarProdutos';
 import Compras from './pages/Compras';
 import EnvioClientes from './pages/EnvioClientes';
-import CalendarioViagens from './pages/CalendarioViagens';
 
 function Sidebar() {
   const location = useLocation();
@@ -84,14 +83,6 @@ function Sidebar() {
           <Send size={20} />
           Envio Clientes
         </Link>
-        <Link
-          to="/viagens"
-          className={`nav-link ${location.pathname === '/viagens' ? 'active' : ''}`}
-          style={navLinkStyle(location.pathname === '/viagens')}
-        >
-          <Calendar size={20} />
-          Viagens
-        </Link>
       </nav>
 
       <div style={{ marginTop: 'auto', padding: '1rem', textAlign: 'center' }}>
@@ -144,7 +135,6 @@ function InnerApp() {
           <Route path="/produtos" element={<GerenciarProdutos />} />
           <Route path="/compras" element={<Compras />} />
           <Route path="/envio-clientes" element={<EnvioClientes />} />
-          <Route path="/viagens" element={<CalendarioViagens />} />
         </Routes>
       </main>
 
@@ -169,10 +159,6 @@ function InnerApp() {
         <Link to="/produtos" style={mobileNavStyle(isActive('/produtos'))}>
           <Tag size={24} />
           <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Prod</span>
-        </Link>
-        <Link to="/viagens" style={mobileNavStyle(isActive('/viagens'))}>
-          <Calendar size={24} />
-          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Viagens</span>
         </Link>
       </nav>
     </div>
