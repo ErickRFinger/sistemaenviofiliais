@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PackagePlus, Tag, ShoppingBag, Send, Calendar } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, Tag, ShoppingBag, Send } from 'lucide-react';
 import './index.css';
 
 // Lazy loading could be used here, but for simplicity we import directly for now
